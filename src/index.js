@@ -4,29 +4,25 @@ import './index.css';
 import App from './App';
 import registerServiceWorker from './registerServiceWorker';
 
-import { createStore } from 'redux';
+import thunk from 'redux-thunk';
+import { applyMiddleware, compose, combineReducers, createStore } from 'redux';
+import { Provider } from 'react-redux';
+import productsReducer from './reducers/products-reducer';
+import userReducer from './reducers/user-reducer';
 
-function reducer(state, action) {
-    if (action.type === 'changeState') {
-        return action.payload.newState;
-    }
-    return 'State';
-}
+const allReducers = combineReducers({
+    products: productsReducer,
+    user: userReducer
+}),
+    allStoreEnhancers = compose(applyMiddleware(thunk), window.devToolsExtension && window.devToolsExtension()),
+    store = createStore(
+        allReducers,
+        {
+            products: [{ name: 'iPhone' }],
+            user: 'Michael'
+        },
+        allStoreEnhancers
+    );
 
-const store = createStore(reducer);
-
-console.log(store.getState());
-
-const action = {
-    type: 'changeState',
-    payload: {
-        newState: 'New state'
-    }
-};
-
-store.dispatch(action);
-
-console.log(store.getState());
-
-ReactDOM.render(<App />, document.getElementById('root'));
+ReactDOM.render(<Provider store={store}><App aRandomProps="whatever" /></Provider>, document.getElementById('root'));
 registerServiceWorker();
